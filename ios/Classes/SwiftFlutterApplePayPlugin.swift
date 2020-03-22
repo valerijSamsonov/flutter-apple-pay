@@ -34,7 +34,6 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
             guard let currencyCode = arguments["currencyCode"] as? String else {return}
             guard let paymentItems = arguments["paymentItems"] as? [NSDictionary] else {return}
             guard let merchantIdentifier = arguments["merchantIdentifier"] as? String else {return}
-            guard let merchantName = arguments["merchantName"] as? String else {return}
             guard let isPending = arguments["isPending"] as? Bool else {return}
             
             let type = isPending ? PKPaymentSummaryItemType.pending : PKPaymentSummaryItemType.final;
@@ -47,11 +46,7 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
                 
                 items.append(PKPaymentSummaryItem(label: label, amount: NSDecimalNumber(floatLiteral: price), type: type))
             }
-    
-            
-            let total = PKPaymentSummaryItem(label: merchantName, amount: NSDecimalNumber(floatLiteral:totalPrice), type: type)
-            items.append(total)
-            
+               
             paymentNeworks.forEach {
                 
                 guard let paymentType = PaymentSystem(rawValue: $0) else {
@@ -63,7 +58,6 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
             }
             
             parameters["paymentNetworks"] = payments
-            // parameters["requiredShippingContactFields"] = [PKContactField.name, PKContactField.postalAddress] as Set
             parameters["merchantCapabilities"] = PKMerchantCapability.capability3DS // optional
             
             parameters["merchantIdentifier"] = merchantIdentifier
@@ -79,7 +73,11 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
         }
         else if call.method == "closeApplePaySheetWithError" {
             closeApplePaySheetWithError()
-        }  else {
+        }  
+        else if call.method == "canMakePayments" {
+            result(PKPaymentAuthorizationViewController.canMakePayments()) 
+        } 
+        else {
             result("Flutter method not implemented on iOS")
         }
     }

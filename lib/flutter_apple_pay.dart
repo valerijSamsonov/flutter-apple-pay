@@ -13,7 +13,6 @@ class FlutterApplePay {
     @required String currencyCode,
     @required List<PaymentNetwork> paymentNetworks,
     @required String merchantIdentifier,
-    @required String merchantName,
     bool isPending = false,
     @required List<PaymentItem> paymentItems,
  
@@ -22,7 +21,6 @@ class FlutterApplePay {
     assert(currencyCode != null);
     assert(paymentItems != null);
     assert(merchantIdentifier != null);
-    assert(merchantName != null);
     assert(paymentItems != null);
  
 
@@ -35,7 +33,6 @@ class FlutterApplePay {
       'paymentItems':
           paymentItems.map((PaymentItem item) => item._toMap()).toList(),
       'merchantIdentifier': merchantIdentifier,
-      'merchantName' : merchantName,
       'isPending' : isPending
     };
     if (Platform.isIOS) {
@@ -58,7 +55,16 @@ class FlutterApplePay {
       throw Exception("Not supported operation system");
     }
   }
+
+    static Future<bool> canMakePayments() async {
+    if (Platform.isIOS) {
+      return await _channel.invokeMethod('canMakePayments');
+    } else {
+      throw Exception("Not supported operation system");
+    }
+  }
 }
+
 
 class PaymentItem {
   final String label;
