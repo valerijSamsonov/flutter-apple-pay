@@ -8,7 +8,7 @@ class FlutterApplePay {
   static const MethodChannel _channel =
       const MethodChannel('flutter_apple_pay');
 
-  static Future<dynamic> getStripeToken({
+  static Future<dynamic> getPaymentToken({
     @required String countryCode,
     @required String currencyCode,
     @required List<PaymentNetwork> paymentNetworks,
@@ -16,7 +16,7 @@ class FlutterApplePay {
     @required String merchantName,
     bool isPending = false,
     @required List<PaymentItem> paymentItems,
-    @required String stripePublishedKey,
+ 
   }) async {
     assert(countryCode != null);
     assert(currencyCode != null);
@@ -24,13 +24,13 @@ class FlutterApplePay {
     assert(merchantIdentifier != null);
     assert(merchantName != null);
     assert(paymentItems != null);
-    assert(stripePublishedKey != null);
+ 
 
     final Map<String, Object> args = <String, dynamic>{
       'paymentNetworks':
           paymentNetworks.map((item) => item.toString().split('.')[1]).toList(),
       'countryCode': countryCode,
-      'stripePublishedKey': stripePublishedKey,
+ 
       'currencyCode': currencyCode,
       'paymentItems':
           paymentItems.map((PaymentItem item) => item._toMap()).toList(),
@@ -39,8 +39,8 @@ class FlutterApplePay {
       'isPending' : isPending
     };
     if (Platform.isIOS) {
-      final dynamic stripeToken = await _channel.invokeMethod('getStripeToken', args);
-      return stripeToken;
+      final dynamic paymenToken = await _channel.invokeMethod('getPaymentToken', args);
+      return paymenToken;
     } else {
       throw Exception("Not supported operation system");
     }

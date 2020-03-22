@@ -2,7 +2,6 @@ import Flutter
 import UIKit
 import Foundation
 import PassKit
-import Stripe
 
 typealias AuthorizationCompletion = (_ payment: String) -> Void
 typealias AuthorizationViewControllerDidFinish = (_ error : NSDictionary) -> Void
@@ -22,7 +21,7 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        if call.method == "getStripeToken" {
+        if call.method == "getPaymentToken" {
             flutterResult = result;
             let parameters = NSMutableDictionary()
             var payments: [PKPaymentNetwork] = []
@@ -33,8 +32,6 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
             guard let paymentNeworks = arguments["paymentNetworks"] as? [String] else {return}
             guard let countryCode = arguments["countryCode"] as? String else {return}
             guard let currencyCode = arguments["currencyCode"] as? String else {return}
-
-            guard let stripePublishedKey = arguments["stripePublishedKey"] as? String else {return}
             guard let paymentItems = arguments["paymentItems"] as? [NSDictionary] else {return}
             guard let merchantIdentifier = arguments["merchantIdentifier"] as? String else {return}
             guard let merchantName = arguments["merchantName"] as? String else {return}
@@ -50,8 +47,7 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
                 
                 items.append(PKPaymentSummaryItem(label: label, amount: NSDecimalNumber(floatLiteral: price), type: type))
             }
-            
-            Stripe.setDefaultPublishableKey(stripePublishedKey)
+    
             
             let total = PKPaymentSummaryItem(label: merchantName, amount: NSDecimalNumber(floatLiteral:totalPrice), type: type)
             items.append(total)
@@ -151,8 +147,7 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
             pkrequest.countryCode = countryCode
             pkrequest.currencyCode = currencyCode
             pkrequest.supportedNetworks = paymentNetworks
-            pkrequest.requiredShippingContactFields = requiredShippingContactFields
-            // This is based on using Stripe
+            // pkrequest.requiredShippingContactFields = requiredShippingContactFields
             pkrequest.merchantCapabilities = merchantCapabilities
             
             pkrequest.paymentSummaryItems = paymentSummaryItems
@@ -175,17 +170,9 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
     }
     
     public func paymentAuthorizationViewController(_ controller: PKPaymentAuthorizationViewController, didAuthorizePayment payment: PKPayment, handler completion: @escaping (PKPaymentAuthorizationResult) -> Void) {
-        
-        STPAPIClient.shared().createToken(with: payment) { (stripeToken, error) in
-            guard error == nil, let stripeToken = stripeToken else {
-                print(error!)
-                completion(PKPaymentAuthorizationResult(status: .failure, errors: nil))
-                return
-            }
-            
-            self.authorizationCompletion(stripeToken.stripeID)
-            self.completionHandler = completion
-        }
+
+        self.authorizationCompletion(payment)
+        self.completionHandler = completion
 
     }
 
