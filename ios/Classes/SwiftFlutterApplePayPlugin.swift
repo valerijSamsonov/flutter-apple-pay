@@ -14,7 +14,6 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
     var flutterResult: FlutterResult!;
     var completionHandler: CompletionHandler!
     
-    
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "flutter_apple_pay", binaryMessenger: registrar.messenger())
         registrar.addMethodCallDelegate(SwiftFlutterApplePayPlugin(), channel: channel)
@@ -34,13 +33,11 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
             guard let currencyCode = arguments["currencyCode"] as? String else {return}
             guard let paymentItems = arguments["paymentItems"] as? [NSDictionary] else {return}
             guard let merchantIdentifier = arguments["merchantIdentifier"] as? String else {return}
-            guard let isPending = arguments["isPending"] as? Bool else {return}
-            
-            let type = isPending ? PKPaymentSummaryItemType.pending : PKPaymentSummaryItemType.final;
             
             for dictionary in paymentItems {
                 guard let label = dictionary["label"] as? String else {return}
                 guard let price = dictionary["amount"] as? Double else {return}
+                let type = PKPaymentSummaryItemType.final
 
                 totalPrice += price
                 
@@ -84,13 +81,12 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
     
     func authorizationCompletion(_ payment: String) {
         // success
-//        var result: [String: Any] = [:]
-//
-//        result["token"] = payment.token.transactionIdentifier
-//        result["billingContact"] = payment.billingContact?.emailAddress
-//        result["shippingContact"] = payment.shippingContact?.emailAddress
-//        result["shippingMethod"] = payment.shippingMethod?.detail
-//
+        var result: [String: Any] = [:]
+        result["pk_token"] = String(data: payment.token.paymentData, encoding: String.Encoding.utf8)
+        result["pk_token_instrument_name"] = payment.token.paymentMethod.displayName
+        result["pk_token_payment_network"] = payment.token.paymentMethod.network
+        result["pk_token_transaction_id"] = payment.token.transactionIdentifier
+        
         flutterResult(payment)
     }
     
@@ -103,11 +99,11 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
         case visa
         case mastercard
         case amex
-        case quicPay
-        case chinaUnionPay
-        case discover
-        case interac
-        case privateLabel
+        // case quicPay
+        // case chinaUnionPay
+        // case discover
+        // case interac
+        // case privateLabel
         
         var paymentNetwork: PKPaymentNetwork {
             
@@ -115,11 +111,11 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
                 case .mastercard: return PKPaymentNetwork.masterCard
                 case .visa: return PKPaymentNetwork.visa
                 case .amex: return PKPaymentNetwork.amex
-                case .quicPay: return PKPaymentNetwork.quicPay
-                case .chinaUnionPay: return PKPaymentNetwork.chinaUnionPay
-                case .discover: return PKPaymentNetwork.discover
-                case .interac: return PKPaymentNetwork.interac
-                case .privateLabel: return PKPaymentNetwork.privateLabel
+                // case .quicPay: return PKPaymentNetwork.quicPay
+                // case .chinaUnionPay: return PKPaymentNetwork.chinaUnionPay
+                // case .discover: return PKPaymentNetwork.discover
+                // case .interac: return PKPaymentNetwork.interac
+                // case .privateLabel: return PKPaymentNetwork.privateLabel
             }
         }
     }
@@ -176,13 +172,13 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
 
     public func closeApplePaySheetWithSuccess() {
         if (self.completionHandler != nil) {
-            self.completionHandler(PKPaymentAuthorizationResult(status: .success, errors: nil))
+            self.completionHandler(PKPaymentAuthorizationStatus.success)
         }
     }
 
     public func closeApplePaySheetWithError() {
         if (self.completionHandler != nil) {
-            self.completionHandler(PKPaymentAuthorizationResult(status: .failure, errors: nil))
+            self.completionHandler(PKPaymentAuthorizationStatus.failure)
         }
     }
     
@@ -192,8 +188,8 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
             return
         }
         currentViewController.dismiss(animated: true, completion: nil)
-        let error: NSDictionary = ["message": "User closed apple pay", "code": "400"]
-        authorizationViewControllerDidFinish(error)
+        // let error: NSDictionary = ["message": "User closed apple pay", "code": "400"]
+        // authorizationViewControllerDidFinish(error)
     }
     
     func makePaymentSummaryItems(itemsParameters: Array<Dictionary <String, Any>>) -> [PKPaymentSummaryItem]? {
