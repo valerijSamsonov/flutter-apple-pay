@@ -5,7 +5,7 @@ import PassKit
 
 typealias AuthorizationCompletion = (_ payment: PKPayment) -> Void
 typealias AuthorizationViewControllerDidFinish = (_ error : NSDictionary) -> Void
-typealias CompletionHandler = (PKPaymentAuthorizationResult) -> Void
+typealias CompletionHandler = (PKPaymentAuthorizationStatus) -> Void
 
 public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAuthorizationViewControllerDelegate {
     var authorizationCompletion : AuthorizationCompletion!
