@@ -79,7 +79,7 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
         }
     }
     
-    func authorizationCompletion(_ payment: String) {
+    func authorizationCompletion(_ payment: PKPayment) {
         // success
         var result: [String: Any] = [:]
         result["pk_token"] = String(data: payment.token.paymentData, encoding: String.Encoding.utf8)
@@ -163,7 +163,7 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
         return
     }
     
-    public func paymentAuthorizationViewController(_ controller: PKPaymentAuthorizationViewController, didAuthorizePayment payment: PKPayment, handler completion: @escaping (PKPaymentAuthorizationResult) -> Void) {
+    public func paymentAuthorizationViewController(_ controller: PKPaymentAuthorizationViewController, didAuthorizePayment payment: PKPayment, handler completion: @escaping (PKPaymentAuthorizationStatus) -> Void) {
 
         self.authorizationCompletion(payment)
         self.completionHandler = completion
