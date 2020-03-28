@@ -82,22 +82,16 @@ public class SwiftFlutterApplePayPlugin: NSObject, FlutterPlugin, PKPaymentAutho
     func authorizationCompletion(_ payment: PKPayment) {
         // success
         var result: [String: Any] = [:]
-        print("payment  \(payment)")
         result["pk_token"] = String(data: payment.token.paymentData, encoding: String.Encoding.utf8)
-        print("pk_token  \(result["pk_token"])")
         result["pk_token_instrument_name"] = payment.token.paymentMethod.displayName
-        print("pk_token_instrument_name  \(result["pk_token_instrument_name"])")
         result["pk_token_payment_network"] = payment.token.paymentMethod.network
-        print("pk_token_payment_network  \(result["pk_token_payment_network"])")
         result["pk_token_transaction_id"] = payment.token.transactionIdentifier
-        print("pk_token_transaction_id  \(result["pk_token_transaction_id"])")
-
-        
-        flutterResult(payment)
+        flutterResult(result)
     }
     
     func authorizationViewControllerDidFinish(_ error : NSDictionary) {
         //error
+        print("ERROR ERROR ERROR  \(error)")
         flutterResult(error)
     }
     
